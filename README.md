@@ -20,6 +20,8 @@ Este proyecto en PHP permite registrar usuarios, iniciar sesión, recuperar cont
 - `recuperar_claveext.php`
 - `recuperar_clave_confirmar.php`
 - `stock (1).sql`
+- `con_db.php`
+- `config.php`
 
 ## ⚙️ Configuración Paso a Paso
 
@@ -47,18 +49,32 @@ Esto va a crear la base de datos `registro` con las tablas necesarias:
 - `usuarios`
 - `recuperar`
 
-### 4. Verificar conexión a la base de datos en los archivos PHP
+### 4. Configuración de conexión a la base de datos
 
-Asegurate de que los archivos PHP que se conectan a la base de datos tengan una sección como esta:
+Este proyecto ya incluye los archivos `config.php` y `con_db.php` que centralizan la conexión con la base de datos.
+
+Asegurate de que el archivo `config.php` contenga la configuración correcta para tu entorno:
 
 ```php
-$conexion = new mysqli("localhost", "root", "", "registro");
+<?php
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db = "registro";
+?>
+```
+
+Y que `con_db.php` use esta configuración:
+
+```php
+<?php
+include 'config.php';
+$conexion = new mysqli($host, $user, $pass, $db);
 if ($conexion->connect_error) {
     die("Conexión fallida: " . $conexion->connect_error);
 }
+?>
 ```
-
-> 🔐 Si tenés una contraseña definida para el usuario `root` en tu instalación de MySQL, asegurate de agregarla en el cuarto parámetro del `new mysqli()`.
 
 ### 5. Ejecutar el sistema
 
@@ -83,12 +99,14 @@ Ahí podés comenzar a usar la aplicación: registrar nuevos usuarios, iniciar s
 | `recuperar_clave.php`         | Solicita email para recuperar contraseña    |
 | `recuperar_claveext.php`      | Genera y envía token de recuperación        |
 | `recuperar_clave_confirmar.php` | Permite definir nueva contraseña         |
+| `config.php`                  | Contiene los datos de conexión              |
+| `con_db.php`                  | Establece la conexión con la base de datos  |
 
 ## 🔒 Seguridad (Recomendaciones)
 
-- Las contraseñas deben cifrarse usando `password_hash()` y verificarse con `password_verify()` (verificá que esté implementado).
-- Se recomienda usar un archivo `config.php` separado para centralizar la conexión a la base de datos.
-- Asegurate de que los tokens de recuperación expiren después de cierto tiempo (esto se gestiona con la columna `fechaalta`).
+- Las contraseñas deben cifrarse usando `password_hash()` y verificarse con `password_verify()`.
+- Ya se está usando un archivo `config.php` separado para centralizar la conexión.
+- Asegurate de que los tokens de recuperación expiren después de cierto tiempo (`fechaalta` en la tabla `recuperar`).
 
 ## ✅ Listo
 
