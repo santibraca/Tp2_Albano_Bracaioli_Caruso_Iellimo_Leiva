@@ -1,13 +1,13 @@
 # Sistema de Registro de Usuarios y Recuperación de Contraseña
 
-Este proyecto en PHP permite registrar usuarios, iniciar sesión, recuperar contraseñas y cerrar sesión. Utiliza MySQL para la base de datos y está pensado para ser ejecutado en un entorno local con XAMPP.
+Este proyecto en PHP permite registrar usuarios, iniciar sesión (incluyendo con Google), recuperar contraseñas y cerrar sesión. Utiliza MySQL para la base de datos y está diseñado para ejecutarse en un entorno local con XAMPP.
 
 ## ✅ Requisitos Previos
 
-- [XAMPP](https://www.apachefriends.org/) instalado en tu computadora (incluye Apache y MySQL).
+- [XAMPP](https://www.apachefriends.org/) instalado en tu computadora.
 - Navegador web.
-- Editor de texto o IDE (opcional, recomendado: VS Code).
-- (Opcional) Composer para manejo de dependencias de Google API.
+- Composer (para instalar dependencias de Google API).
+- Cuenta de Google Cloud con OAuth 2.0 habilitado.
 
 ## 📁 Archivos Incluidos
 
@@ -22,108 +22,81 @@ Este proyecto en PHP permite registrar usuarios, iniciar sesión, recuperar cont
 - `recuperar_clave_confirmar.php`
 - `stock (1).sql`
 - `con_db.php`
-- `config.php`
 
 ## ⚙️ Configuración Paso a Paso
 
 ### 1. Mover los archivos al directorio de XAMPP
 
-Ubica la carpeta del proyecto (que contenga todos los archivos PHP mencionados) dentro de la carpeta `htdocs` de XAMPP. Por ejemplo:
+Colocá la carpeta del proyecto dentro de `htdocs`, por ejemplo:
 
 ```
-C:\xampp\htdocs\registro-app\
+C:\xampp\htdocs\TP\
 ```
 
 ### 2. Iniciar los servicios de XAMPP
 
 - Abrí el **Panel de Control de XAMPP**
-- Activá los módulos **Apache** y **MySQL**
+- Iniciá **Apache** y **MySQL**
 
 ### 3. Crear la base de datos
 
-1. Abrí tu navegador y andá a [http://localhost/phpmyadmin](http://localhost/phpmyadmin)
-2. Hacé clic en la pestaña **Importar**
+1. Ingresá a [http://localhost/phpmyadmin](http://localhost/phpmyadmin)
+2. Elegí la pestaña **Importar**
 3. Seleccioná el archivo `stock (1).sql`
 4. Hacé clic en **Continuar**
 
-Esto va a crear la base de datos `registro` con las tablas necesarias:
-- `usuarios`
-- `recuperar`
+Esto crea la base de datos `registro` con las tablas `usuarios` y `recuperar`.
 
-### 4. Configuración de conexión a la base de datos
+### 4. Conexión a la base de datos
 
-Este proyecto ya incluye los archivos `config.php` y `con_db.php` que centralizan la conexión con la base de datos.
-
-Ejemplo de `config.php`:
+El archivo `con_db.php` ya incluye la conexión básica:
 
 ```php
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db = "registro";
+$conex = mysqli_connect("localhost","root","","registro"); 
 ?>
 ```
 
-Ejemplo de `con_db.php`:
-
-```php
-<?php
-include 'config.php';
-$conexion = new mysqli($host, $user, $pass, $db);
-if ($conexion->connect_error) {
-    die("Conexión fallida: " . $conexion->connect_error);
-}
-?>
-```
+Modificá los datos si tu entorno tiene credenciales diferentes.
 
 ---
 
 ## 🔐 Integración con Google Login (OAuth 2.0)
 
-Este sistema incluye autenticación con Google. Para configurarlo:
-
 ### 1. Crear proyecto en Google Cloud
 
 - Accedé a [https://console.cloud.google.com/](https://console.cloud.google.com/)
 - Creá un proyecto
-- Configurá la pantalla de consentimiento OAuth (tipo: Externa)
-- Creá una credencial de tipo **ID de cliente de OAuth**
-  - Tipo de aplicación: **Aplicación web**
-  - URI autorizado de redirección:
+- Habilitá la **pantalla de consentimiento OAuth** (tipo Externa)
+- Luego, creá credenciales de tipo **ID de cliente de OAuth**
+  - Tipo: Aplicación Web
+  - URI de redirección:
     ```
     http://localhost/TP/index.php
     ```
 
-### 2. Configurar Client ID y Secret
+### 2. Agregar credenciales en `registro.php`
 
-Agregalos en `config.php` u otro archivo de configuración:
+Editá `registro.php` y colocá tu Client ID y Secret:
 
 ```php
-$google_client_id = "TU_CLIENT_ID";
-$google_client_secret = "TU_CLIENT_SECRET";
-$google_redirect_uri = "http://localhost/TP/index.php";
+$google_client->setClientId('TU_CLIENT_ID');
+$google_client->setClientSecret('TU_CLIENT_SECRET');
+$google_client->setRedirectUri('http://localhost/TP/index.php');
 ```
 
-### 3. Cargar Google API Client
+### 3. Instalar dependencias de Google API
 
-Instalación por Composer (opcional pero recomendado):
+Desde la raíz del proyecto, ejecutá:
 
 ```bash
-composer require google/apiclient:^2.0
+composer require google/apiclient
 ```
 
-Código de inicialización:
+Esto creará el directorio `vendor/` necesario para usar:
 
 ```php
 require_once 'vendor/autoload.php';
-
-$client = new Google_Client();
-$client->setClientId($google_client_id);
-$client->setClientSecret($google_client_secret);
-$client->setRedirectUri($google_redirect_uri);
-$client->addScope("email");
-$client->addScope("profile");
 ```
 
 ---
@@ -135,25 +108,32 @@ $client->addScope("profile");
 | `index.php`                   | Página principal                            |
 | `login.php`                   | Formulario de inicio de sesión              |
 | `logout.php`                  | Cierra la sesión del usuario                |
-| `registro.php`                | Formulario de registro                      |
-| `procesar_registro.php`       | Procesa y guarda nuevos usuarios            |
-| `verificar_login.php`         | Verifica las credenciales al iniciar sesión |
-| `recuperar_clave.php`         | Solicita email para recuperar contraseña    |
-| `recuperar_claveext.php`      | Genera y envía token de recuperación        |
+| `registro.php`                | Registro de usuario y login con Google      |
+| `procesar_registro.php`       | Procesa el registro manual                  |
+| `verificar_login.php`         | Verifica credenciales                       |
+| `recuperar_clave.php`         | Formulario de recuperación por email        |
+| `recuperar_claveext.php`      | Genera token y lo envía                     |
 | `recuperar_clave_confirmar.php` | Permite definir nueva contraseña         |
-| `config.php`                  | Contiene los datos de conexión              |
-| `con_db.php`                  | Establece la conexión con la base de datos  |
-
-## 🛡️ Seguridad (Recomendaciones)
-
-- Usar `password_hash()` y `password_verify()` para manejar contraseñas.
-- Manejar vencimiento de tokens con `fechaalta` en la tabla `recuperar`.
-- Proteger formularios contra CSRF y validar entradas del usuario.
-
-## ✅ Listo
-
-Una vez configurado todo, el sistema debería estar en funcionamiento en tu entorno local. Podés registrar nuevos usuarios, iniciar sesión, iniciar sesión con Google y usar la recuperación de contraseña.
+| `con_db.php`                  | Conexión a la base de datos                 |
 
 ---
 
-📧 Si tenés dudas o errores al ejecutar el sistema, revisá los logs de Apache y MySQL en el panel de XAMPP.
+## 🛡️ Seguridad Recomendaciones
+
+- Usar `password_hash()` y `password_verify()` en lugar de guardar contraseñas planas.
+- Validar y sanear todas las entradas del usuario.
+- Implementar expiración de tokens en la tabla `recuperar`.
+
+## ✅ Final
+
+Tu aplicación estará disponible en:
+
+```
+http://localhost/TP/index.php
+```
+
+Probá el registro manual, login con Google y la recuperación de contraseña.
+
+---
+
+📧 En caso de errores, revisá los logs de Apache y MySQL desde el panel de XAMPP.
