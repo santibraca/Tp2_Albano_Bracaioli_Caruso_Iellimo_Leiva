@@ -129,7 +129,7 @@ require_once 'vendor/autoload.php';
 Tu aplicación estará disponible en:
 
 ```
-http://localhost/TP/index.php
+http://localhost/TP/registro.php
 ```
 
 Probá el registro manual, login con Google y la recuperación de contraseña.
